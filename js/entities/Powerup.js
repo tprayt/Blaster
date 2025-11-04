@@ -14,8 +14,8 @@ export class Powerup extends Entity {
     }
 
     // Update powerup
-    update() {
-        super.update();
+    update(speedMultiplier = 1.0) {
+        super.update(speedMultiplier);
         this.rotation += 0.05; // Rotate for visual effect
     }
 

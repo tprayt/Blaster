@@ -97,5 +97,14 @@ export const CONFIG = {
     RENDERING: {
         FPS: 60,
         STAR_COUNT: 100
-    }
+    },
+
+    // Game Speed Control
+    GAME_SPEED: {
+        SLOW: { name: 'Slow (0.5x)', multiplier: 0.5 },
+        NORMAL: { name: 'Normal (1x)', multiplier: 1.0 },
+        FAST: { name: 'Fast (1.5x)', multiplier: 1.5 },
+        VERY_FAST: { name: 'Very Fast (2x)', multiplier: 2.0 }
+    },
+    DEFAULT_SPEED: 'NORMAL'
 };

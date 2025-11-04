@@ -40,6 +40,8 @@ export class Game {
         // Game state
         this.level = 1;
         this.currentDifficulty = 'EASY';
+        this.currentSpeed = this.config.DEFAULT_SPEED;
+        this.speedMultiplier = this.config.GAME_SPEED[this.currentSpeed].multiplier;
         this.enemySpawnTimer = 0;
         this.lastSpawnTime = 0;
 
@@ -82,6 +84,18 @@ export class Game {
             this.currentDifficulty = difficulties[nextIndex];
             this.mathManager.setDifficulty(this.currentDifficulty);
             difficultyBtn.textContent = `Difficulty: ${this.config.DIFFICULTY[this.currentDifficulty].name}`;
+        });
+
+        // Speed select
+        const speedBtn = document.getElementById('speed-select');
+        speedBtn.addEventListener('click', () => {
+            const speeds = ['SLOW', 'NORMAL', 'FAST', 'VERY_FAST'];
+            const currentIndex = speeds.indexOf(this.currentSpeed);
+            const nextIndex = (currentIndex + 1) % speeds.length;
+            this.currentSpeed = speeds[nextIndex];
+            this.speedMultiplier = this.config.GAME_SPEED[this.currentSpeed].multiplier;
+            speedBtn.textContent = `Speed: ${this.config.GAME_SPEED[this.currentSpeed].name}`;
+            this.updateSpeedDisplay();
         });
 
         // Instructions
@@ -148,8 +162,9 @@ export class Game {
         this.scoreManager.reset();
         this.inputManager.reset();
 
-        // Update level display
+        // Update displays
         document.getElementById('level').textContent = this.level;
+        this.updateSpeedDisplay();
 
         // Create player
         this.player = new Player(
@@ -283,12 +298,13 @@ export class Game {
         this.updateStars();
 
         // Update player
-        this.player.update(this.inputManager);
+        this.player.update(this.inputManager, this.speedMultiplier);
 
-        // Spawn enemies
+        // Spawn enemies (adjust spawn rate based on speed)
         const now = Date.now();
-        const spawnRate = this.config.DIFFICULTY[this.currentDifficulty].spawnRate;
-        if (now - this.lastSpawnTime > spawnRate) {
+        const baseSpawnRate = this.config.DIFFICULTY[this.currentDifficulty].spawnRate;
+        const adjustedSpawnRate = baseSpawnRate / this.speedMultiplier;
+        if (now - this.lastSpawnTime > adjustedSpawnRate) {
             this.spawnEnemy();
             this.lastSpawnTime = now;
         }
@@ -296,7 +312,7 @@ export class Game {
         // Update enemies
         for (let i = this.enemies.length - 1; i >= 0; i--) {
             const enemy = this.enemies[i];
-            enemy.update();
+            enemy.update(this.speedMultiplier);
 
             // Remove if off screen (reached bottom - player loses)
             if (enemy.position.y > this.canvas.height) {
@@ -314,7 +330,7 @@ export class Game {
         // Update projectiles
         for (let i = this.projectiles.length - 1; i >= 0; i--) {
             const projectile = this.projectiles[i];
-            projectile.update();
+            projectile.update(this.speedMultiplier);
 
             // Remove if off screen
             if (projectile.isOffScreen(this.canvas.width, this.canvas.height)) {
@@ -325,7 +341,7 @@ export class Game {
         // Update powerups
         for (let i = this.powerups.length - 1; i >= 0; i--) {
             const powerup = this.powerups[i];
-            powerup.update();
+            powerup.update(this.speedMultiplier);
 
             // Remove if off screen
             if (powerup.isOffScreen(this.canvas.width, this.canvas.height)) {
@@ -342,12 +358,19 @@ export class Game {
 
     updateStars() {
         for (const star of this.stars) {
-            star.y += star.speed;
+            star.y += star.speed * this.speedMultiplier;
 
             if (star.y > this.canvas.height) {
                 star.y = 0;
                 star.x = Math.random() * this.canvas.width;
             }
+        }
+    }
+
+    updateSpeedDisplay() {
+        const speedDisplay = document.getElementById('speed-display');
+        if (speedDisplay) {
+            speedDisplay.textContent = `${this.speedMultiplier}x`;
         }
     }
 

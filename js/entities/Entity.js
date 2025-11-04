@@ -11,8 +11,9 @@ export class Entity {
     }
 
     // Update entity position
-    update() {
-        this.position.add(this.velocity);
+    update(speedMultiplier = 1.0) {
+        const adjustedVelocity = this.velocity.copy().multiply(speedMultiplier);
+        this.position.add(adjustedVelocity);
     }
 
     // Render entity (to be overridden by subclasses)

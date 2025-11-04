@@ -11,8 +11,8 @@ export class Projectile extends Entity {
     }
 
     // Update projectile
-    update() {
-        super.update();
+    update(speedMultiplier = 1.0) {
+        super.update(speedMultiplier);
     }
 
     // Render projectile

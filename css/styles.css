@@ -87,6 +87,10 @@ body {
     color: #ff8800;
 }
 
+#speed-display {
+    color: #00ffff;
+}
+
 /* Problem Display */
 #problem-display {
     position: absolute;

@@ -12,8 +12,8 @@ export class Enemy extends Entity {
     }
 
     // Update enemy position
-    update() {
-        super.update();
+    update(speedMultiplier = 1.0) {
+        super.update(speedMultiplier);
     }
 
     // Render enemy

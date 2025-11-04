@@ -18,14 +18,14 @@ export class Player extends Entity {
     }
 
     // Update player based on input
-    update(inputManager) {
+    update(inputManager, speedMultiplier = 1.0) {
         const direction = inputManager.getMovementDirection();
 
-        // Apply movement
+        // Apply movement (player speed is not affected by game speed - stays responsive)
         this.velocity.set(direction.x * this.speed, direction.y * this.speed);
 
-        // Update position
-        super.update();
+        // Update position (pass 1.0 to keep player at normal speed)
+        super.update(1.0);
 
         // Keep player within bounds
         this.position.x = clamp(this.position.x, 0, this.canvasWidth - this.width);
