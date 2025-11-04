@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Blaster - Browser Edition</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div id="game-container">
+        <div id="ui-overlay">
+            <div id="hud">
+                <div class="hud-item">
+                    <span class="label">Score:</span>
+                    <span id="score">0</span>
+                </div>
+                <div class="hud-item">
+                    <span class="label">Lives:</span>
+                    <span id="lives">3</span>
+                </div>
+                <div class="hud-item">
+                    <span class="label">Level:</span>
+                    <span id="level">1</span>
+                </div>
+                <div class="hud-item">
+                    <span class="label">Streak:</span>
+                    <span id="streak">0</span>
+                </div>
+            </div>
+
+            <div id="problem-display" class="hidden">
+                <div id="problem-text"></div>
+                <div id="answer-input">
+                    <span id="answer-text"></span>
+                    <span class="cursor">|</span>
+                </div>
+            </div>
+
+            <div id="menu-screen" class="screen">
+                <h1 class="game-title">MATH BLASTER</h1>
+                <p class="subtitle">Educational Space Shooter</p>
+                <div class="menu-options">
+                    <button id="start-game" class="menu-btn">Start Game</button>
+                    <button id="difficulty-select" class="menu-btn">Difficulty: Easy</button>
+                    <button id="instructions" class="menu-btn">Instructions</button>
+                </div>
+                <div id="instructions-panel" class="hidden">
+                    <h2>How to Play</h2>
+                    <ul>
+                        <li>Use Arrow Keys or A/D to move your ship</li>
+                        <li>Type the answer to the math problem</li>
+                        <li>Press ENTER to shoot</li>
+                        <li>Destroy enemies before they reach you</li>
+                        <li>Collect power-ups for bonuses</li>
+                    </ul>
+                    <button id="close-instructions" class="menu-btn">Close</button>
+                </div>
+            </div>
+
+            <div id="pause-screen" class="screen hidden">
+                <h2>PAUSED</h2>
+                <button id="resume-game" class="menu-btn">Resume</button>
+                <button id="quit-game" class="menu-btn">Quit to Menu</button>
+            </div>
+
+            <div id="gameover-screen" class="screen hidden">
+                <h2>GAME OVER</h2>
+                <p>Final Score: <span id="final-score">0</span></p>
+                <p>Accuracy: <span id="accuracy">0</span>%</p>
+                <button id="play-again" class="menu-btn">Play Again</button>
+                <button id="back-to-menu" class="menu-btn">Main Menu</button>
+            </div>
+        </div>
+
+        <canvas id="game-canvas"></canvas>
+    </div>
+
+    <!-- Game Scripts -->
+    <script type="module" src="js/config.js"></script>
+    <script type="module" src="js/utils/Vector2D.js"></script>
+    <script type="module" src="js/utils/helpers.js"></script>
+    <script type="module" src="js/managers/InputManager.js"></script>
+    <script type="module" src="js/managers/MathManager.js"></script>
+    <script type="module" src="js/managers/CollisionManager.js"></script>
+    <script type="module" src="js/managers/ScoreManager.js"></script>
+    <script type="module" src="js/managers/StateManager.js"></script>
+    <script type="module" src="js/managers/AudioManager.js"></script>
+    <script type="module" src="js/entities/Entity.js"></script>
+    <script type="module" src="js/entities/Player.js"></script>
+    <script type="module" src="js/entities/Enemy.js"></script>
+    <script type="module" src="js/entities/Projectile.js"></script>
+    <script type="module" src="js/entities/Powerup.js"></script>
+    <script type="module" src="js/game.js"></script>
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
