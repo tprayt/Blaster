@@ -89,7 +89,7 @@ export class Game {
         // Speed select
         const speedBtn = document.getElementById('speed-select');
         speedBtn.addEventListener('click', () => {
-            const speeds = ['SLOW', 'NORMAL', 'FAST', 'VERY_FAST'];
+            const speeds = ['VERY_SLOW', 'SLOW', 'MEDIUM', 'NORMAL', 'FAST'];
             const currentIndex = speeds.indexOf(this.currentSpeed);
             const nextIndex = (currentIndex + 1) % speeds.length;
             this.currentSpeed = speeds[nextIndex];

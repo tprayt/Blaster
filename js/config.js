@@ -101,10 +101,11 @@ export const CONFIG = {
 
     // Game Speed Control
     GAME_SPEED: {
+        VERY_SLOW: { name: 'Very Slow (0.25x)', multiplier: 0.25 },
         SLOW: { name: 'Slow (0.5x)', multiplier: 0.5 },
+        MEDIUM: { name: 'Medium (0.75x)', multiplier: 0.75 },
         NORMAL: { name: 'Normal (1x)', multiplier: 1.0 },
-        FAST: { name: 'Fast (1.5x)', multiplier: 1.5 },
-        VERY_FAST: { name: 'Very Fast (2x)', multiplier: 2.0 }
+        FAST: { name: 'Fast (1.25x)', multiplier: 1.25 }
     },
     DEFAULT_SPEED: 'NORMAL'
 };
