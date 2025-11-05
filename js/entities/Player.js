@@ -42,43 +42,116 @@ export class Player extends Entity {
 
     // Render player
     render(ctx) {
-        // Draw ship as triangle
-        const centerX = this.position.x;
-        const centerY = this.position.y;
+        const centerX = this.position.x + this.width / 2;
+        const centerY = this.position.y + this.height / 2;
 
         // Flashing effect when invincible
         if (this.invincible && Math.floor(Date.now() / 100) % 2 === 0) {
             return; // Don't draw to create flashing effect
         }
 
+        ctx.save();
+
         // Draw shield if active
         if (this.shield) {
             ctx.strokeStyle = '#00ff00';
             ctx.lineWidth = 3;
+            ctx.shadowColor = '#00ff00';
+            ctx.shadowBlur = 10;
             ctx.beginPath();
-            ctx.arc(
-                centerX + this.width / 2,
-                centerY + this.height / 2,
-                this.width,
-                0,
-                Math.PI * 2
-            );
+            ctx.arc(centerX, centerY, this.width * 0.9, 0, Math.PI * 2);
             ctx.stroke();
+            ctx.shadowBlur = 0;
         }
 
-        // Draw the ship
-        drawTriangle(ctx, centerX, centerY, this.width, this.height, this.color);
-
-        // Draw engine glow
-        ctx.fillStyle = '#ff8800';
-        ctx.globalAlpha = 0.6;
-        ctx.fillRect(
-            centerX + this.width / 2 - 5,
-            centerY + this.height,
-            10,
-            8
+        // Engine trail (animated)
+        const enginePulse = Math.sin(Date.now() * 0.01) * 0.3 + 0.7;
+        const trailGradient = ctx.createLinearGradient(
+            centerX,
+            this.position.y + this.height,
+            centerX,
+            this.position.y + this.height + 15
         );
-        ctx.globalAlpha = 1;
+        trailGradient.addColorStop(0, `rgba(255, 136, 0, ${enginePulse})`);
+        trailGradient.addColorStop(0.5, `rgba(255, 200, 0, ${enginePulse * 0.5})`);
+        trailGradient.addColorStop(1, 'transparent');
+        ctx.fillStyle = trailGradient;
+        ctx.fillRect(centerX - 6, this.position.y + this.height, 4, 15);
+        ctx.fillRect(centerX + 2, this.position.y + this.height, 4, 15);
+
+        // Main ship body
+        ctx.fillStyle = this.color;
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 2;
+
+        // Nose cone
+        ctx.beginPath();
+        ctx.moveTo(centerX, this.position.y);
+        ctx.lineTo(centerX + 8, centerY - 5);
+        ctx.lineTo(centerX + 8, centerY);
+        ctx.lineTo(centerX - 8, centerY);
+        ctx.lineTo(centerX - 8, centerY - 5);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Main fuselage
+        ctx.fillRect(centerX - 10, centerY, 20, 25);
+        ctx.strokeRect(centerX - 10, centerY, 20, 25);
+
+        // Wings
+        ctx.beginPath();
+        ctx.moveTo(centerX - 10, centerY + 5);
+        ctx.lineTo(centerX - 25, centerY + 10);
+        ctx.lineTo(centerX - 25, centerY + 18);
+        ctx.lineTo(centerX - 10, centerY + 20);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(centerX + 10, centerY + 5);
+        ctx.lineTo(centerX + 25, centerY + 10);
+        ctx.lineTo(centerX + 25, centerY + 18);
+        ctx.lineTo(centerX + 10, centerY + 20);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Cockpit
+        ctx.fillStyle = '#00ffff';
+        ctx.fillRect(centerX - 5, centerY + 3, 10, 8);
+        ctx.strokeRect(centerX - 5, centerY + 3, 10, 8);
+
+        // Cockpit glass effect
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+        ctx.fillRect(centerX - 4, centerY + 4, 4, 6);
+
+        // Engine details
+        ctx.fillStyle = '#333';
+        ctx.fillRect(centerX - 8, centerY + 23, 5, 2);
+        ctx.fillRect(centerX + 3, centerY + 23, 5, 2);
+
+        // Engine glow
+        ctx.fillStyle = '#ff8800';
+        ctx.shadowColor = '#ff8800';
+        ctx.shadowBlur = 8;
+        ctx.fillRect(centerX - 8, centerY + 23, 5, 3);
+        ctx.fillRect(centerX + 3, centerY + 23, 5, 3);
+
+        // Accent lines
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(centerX - 6, centerY + 12);
+        ctx.lineTo(centerX - 6, centerY + 20);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(centerX + 6, centerY + 12);
+        ctx.lineTo(centerX + 6, centerY + 20);
+        ctx.stroke();
+
+        ctx.restore();
     }
 
     // Take damage

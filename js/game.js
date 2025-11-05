@@ -4,6 +4,7 @@ import { Player } from './entities/Player.js';
 import { Enemy } from './entities/Enemy.js';
 import { Projectile } from './entities/Projectile.js';
 import { Powerup } from './entities/Powerup.js';
+import { createExplosion } from './entities/Particle.js';
 import { InputManager } from './managers/InputManager.js';
 import { MathManager } from './managers/MathManager.js';
 import { CollisionManager } from './managers/CollisionManager.js';
@@ -35,6 +36,7 @@ export class Game {
         this.enemies = [];
         this.projectiles = [];
         this.powerups = [];
+        this.particles = [];
         this.stars = [];
 
         // Game state
@@ -158,6 +160,7 @@ export class Game {
         this.enemies = [];
         this.projectiles = [];
         this.powerups = [];
+        this.particles = [];
         this.level = 1;
         this.scoreManager.reset();
         this.inputManager.reset();
@@ -349,6 +352,17 @@ export class Game {
             }
         }
 
+        // Update particles
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+            const particle = this.particles[i];
+            particle.update(this.speedMultiplier);
+
+            // Remove if inactive
+            if (!particle.isActive()) {
+                this.particles.splice(i, 1);
+            }
+        }
+
         // Check collisions
         this.checkCollisions();
 
@@ -387,6 +401,12 @@ export class Game {
 
             if (correctAnswer === projectileAnswer) {
                 // Correct answer!
+                // Create explosion at enemy position
+                const explosionX = collision.enemy.position.x + collision.enemy.width / 2;
+                const explosionY = collision.enemy.position.y + collision.enemy.height / 2;
+                const explosionParticles = createExplosion(explosionX, explosionY, collision.enemy.color, 25);
+                this.particles.push(...explosionParticles);
+
                 this.enemies.splice(collision.enemyIndex, 1);
                 this.projectiles.splice(collision.projectileIndex, 1);
 
@@ -416,6 +436,12 @@ export class Game {
         );
 
         for (const collision of playerEnemyCollisions) {
+            // Create explosion
+            const explosionX = collision.enemy.position.x + collision.enemy.width / 2;
+            const explosionY = collision.enemy.position.y + collision.enemy.height / 2;
+            const explosionParticles = createExplosion(explosionX, explosionY, '#ff0000', 20);
+            this.particles.push(...explosionParticles);
+
             this.enemies.splice(collision.enemyIndex, 1);
             const damaged = this.player.takeDamage();
 
@@ -482,6 +508,11 @@ export class Game {
 
         if (this.stateManager.isState(this.config.STATES.PLAYING) ||
             this.stateManager.isState(this.config.STATES.PAUSED)) {
+            // Render particles first (behind everything)
+            for (const particle of this.particles) {
+                particle.render(this.ctx);
+            }
+
             // Render entities
             this.player.render(this.ctx);
 
