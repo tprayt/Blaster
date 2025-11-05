@@ -43,6 +43,8 @@
             <div id="menu-screen" class="screen">
                 <h1 class="game-title">MATH BLASTER</h1>
                 <p class="subtitle">Educational Space Shooter</p>
+                <p class="version">V 0.0.1</p>
+                <div id="highscores-display" class="highscores-container"></div>
                 <div class="menu-options">
                     <button id="start-game" class="menu-btn">Start Game</button>
                     <button id="difficulty-select" class="menu-btn">Difficulty: Easy</button>
@@ -72,6 +74,12 @@
                 <h2>GAME OVER</h2>
                 <p>Final Score: <span id="final-score">0</span></p>
                 <p>Accuracy: <span id="accuracy">0</span>%</p>
+                <div id="name-entry-container" class="name-entry">
+                    <p>Enter your name for the high score:</p>
+                    <input type="text" id="player-name-input" maxlength="15" placeholder="Your Name" />
+                    <button id="submit-score" class="menu-btn">Submit Score</button>
+                </div>
+                <div id="highscore-message" class="highscore-message hidden"></div>
                 <div id="missed-problems-list" class="missed-problems"></div>
                 <button id="play-again" class="menu-btn">Play Again</button>
                 <button id="back-to-menu" class="menu-btn">Main Menu</button>
@@ -91,6 +99,7 @@
     <script type="module" src="js/managers/ScoreManager.js"></script>
     <script type="module" src="js/managers/StateManager.js"></script>
     <script type="module" src="js/managers/AudioManager.js"></script>
+    <script type="module" src="js/managers/HighScoreManager.js"></script>
     <script type="module" src="js/entities/Entity.js"></script>
     <script type="module" src="js/entities/Player.js"></script>
     <script type="module" src="js/entities/Enemy.js"></script>

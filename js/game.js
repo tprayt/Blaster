@@ -12,6 +12,7 @@ import { CollisionManager } from './managers/CollisionManager.js';
 import { ScoreManager } from './managers/ScoreManager.js';
 import { StateManager } from './managers/StateManager.js';
 import { AudioManager } from './managers/AudioManager.js';
+import { HighScoreManager } from './managers/HighScoreManager.js';
 import { randomInt, randomChoice } from './utils/helpers.js';
 
 export class Game {
@@ -31,6 +32,7 @@ export class Game {
         this.scoreManager = new ScoreManager();
         this.stateManager = new StateManager(this.config.STATES.MENU);
         this.audioManager = new AudioManager();
+        this.highScoreManager = new HighScoreManager(10);
 
         // Game entities
         this.player = null;
@@ -132,6 +134,18 @@ export class Game {
         // Back to menu
         document.getElementById('back-to-menu').addEventListener('click', () => {
             this.quitToMenu();
+        });
+
+        // Submit score
+        document.getElementById('submit-score').addEventListener('click', () => {
+            this.submitHighScore();
+        });
+
+        // Allow Enter key in name input to submit
+        document.getElementById('player-name-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                this.submitHighScore();
+            }
         });
     }
 
@@ -268,6 +282,8 @@ export class Game {
         switch (newState) {
             case this.config.STATES.MENU:
                 document.getElementById('menu-screen').classList.remove('hidden');
+                // Update high scores display
+                this.highScoreManager.displayHighScores('highscores-display');
                 break;
 
             case this.config.STATES.PLAYING:
@@ -289,11 +305,31 @@ export class Game {
         document.getElementById('final-score').textContent = stats.score;
         document.getElementById('accuracy').textContent = stats.accuracy;
 
+        // Check if this is a high score
+        const isHighScore = this.highScoreManager.isHighScore(stats.score);
+        const nameEntryContainer = document.getElementById('name-entry-container');
+        const highScoreMessage = document.getElementById('highscore-message');
+
+        if (isHighScore) {
+            // Show name entry form
+            nameEntryContainer.classList.remove('hidden');
+            highScoreMessage.classList.add('hidden');
+
+            // Clear previous name and focus input
+            const nameInput = document.getElementById('player-name-input');
+            nameInput.value = '';
+            setTimeout(() => nameInput.focus(), 100);
+        } else {
+            // Hide name entry form
+            nameEntryContainer.classList.add('hidden');
+            highScoreMessage.classList.add('hidden');
+        }
+
         // Display missed problems
         const missedProblemsContainer = document.getElementById('missed-problems-list');
         if (missedProblemsContainer) {
             if (stats.missedProblems.length === 0) {
-                missedProblemsContainer.innerHTML = '<p style="color: #00ff00;">Perfect! No problems missed! 🎉</p>';
+                missedProblemsContainer.innerHTML = '<p style="color: #00ff00;">Perfect! No problems missed!</p>';
             } else {
                 let html = '<h3>Problems to Practice:</h3><ul>';
                 stats.missedProblems.forEach((item, index) => {
@@ -306,6 +342,31 @@ export class Game {
 
         document.getElementById('gameover-screen').classList.remove('hidden');
         this.audioManager.gameOverSound();
+    }
+
+    submitHighScore() {
+        const nameInput = document.getElementById('player-name-input');
+        const name = nameInput.value.trim() || 'Anonymous';
+        const stats = this.scoreManager.getStats();
+
+        // Add score to high scores
+        const success = this.highScoreManager.addScore(name, stats.score, stats.accuracy);
+
+        if (success) {
+            // Get the rank
+            const rank = this.highScoreManager.getRank(stats.score);
+
+            // Hide name entry form
+            document.getElementById('name-entry-container').classList.add('hidden');
+
+            // Show success message
+            const highScoreMessage = document.getElementById('highscore-message');
+            highScoreMessage.textContent = `🏆 High Score! You ranked #${rank}! 🏆`;
+            highScoreMessage.classList.remove('hidden');
+
+            // Play a success sound (reuse powerup sound)
+            this.audioManager.powerupSound();
+        }
     }
 
     spawnEnemy() {
