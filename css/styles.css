@@ -245,6 +245,49 @@ body {
     color: #00ffff;
 }
 
+/* Missed Problems Report */
+.missed-problems {
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid #ff8800;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 20px 0;
+    max-width: 500px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.missed-problems h3 {
+    color: #ff8800;
+    margin-bottom: 15px;
+    font-size: 22px;
+}
+
+.missed-problems ul {
+    list-style: none;
+    padding: 0;
+}
+
+.missed-problems li {
+    color: #fff;
+    font-size: 18px;
+    margin: 8px 0;
+    padding: 8px;
+    background: rgba(255, 136, 0, 0.1);
+    border-left: 3px solid #ff8800;
+    padding-left: 12px;
+}
+
+.missed-problems .problem {
+    color: #ffff00;
+    font-weight: bold;
+}
+
+.missed-problems .answer {
+    color: #00ff00;
+    font-weight: bold;
+}
+
 /* Pause Screen */
 #pause-screen h2 {
     font-size: 64px;

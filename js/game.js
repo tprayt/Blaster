@@ -5,6 +5,7 @@ import { Enemy } from './entities/Enemy.js';
 import { Projectile } from './entities/Projectile.js';
 import { Powerup } from './entities/Powerup.js';
 import { createExplosion } from './entities/Particle.js';
+import { FloatingText } from './entities/FloatingText.js';
 import { InputManager } from './managers/InputManager.js';
 import { MathManager } from './managers/MathManager.js';
 import { CollisionManager } from './managers/CollisionManager.js';
@@ -37,7 +38,11 @@ export class Game {
         this.projectiles = [];
         this.powerups = [];
         this.particles = [];
+        this.floatingTexts = [];
         this.stars = [];
+
+        // Visual effects
+        this.screenShake = { x: 0, y: 0, intensity: 0 };
 
         // Game state
         this.level = 1;
@@ -91,7 +96,7 @@ export class Game {
         // Speed select
         const speedBtn = document.getElementById('speed-select');
         speedBtn.addEventListener('click', () => {
-            const speeds = ['VERY_SLOW', 'SLOW', 'MEDIUM', 'NORMAL', 'FAST'];
+            const speeds = ['SUPER_SLOW', 'VERY_SLOW', 'SLOW', 'MEDIUM', 'NORMAL', 'FAST'];
             const currentIndex = speeds.indexOf(this.currentSpeed);
             const nextIndex = (currentIndex + 1) % speeds.length;
             this.currentSpeed = speeds[nextIndex];
@@ -131,12 +136,42 @@ export class Game {
     }
 
     createStars() {
-        for (let i = 0; i < this.config.RENDERING.STAR_COUNT; i++) {
+        // Create 3 layers of stars for parallax effect
+        const layerCount = this.config.RENDERING.STAR_COUNT / 3;
+
+        // Layer 1: Far stars (small, slow, blue tint)
+        for (let i = 0; i < layerCount; i++) {
             this.stars.push({
                 x: Math.random() * this.canvas.width,
                 y: Math.random() * this.canvas.height,
-                radius: Math.random() * 2,
-                speed: Math.random() * 0.5 + 0.1
+                radius: Math.random() * 0.5 + 0.5,
+                speed: (Math.random() * 0.2 + 0.1) * 0.4,
+                color: 'rgba(150, 180, 255, 0.6)',
+                layer: 1
+            });
+        }
+
+        // Layer 2: Mid stars (medium, medium speed, cyan tint)
+        for (let i = 0; i < layerCount; i++) {
+            this.stars.push({
+                x: Math.random() * this.canvas.width,
+                y: Math.random() * this.canvas.height,
+                radius: Math.random() * 1 + 1,
+                speed: (Math.random() * 0.3 + 0.2) * 0.7,
+                color: 'rgba(200, 230, 255, 0.8)',
+                layer: 2
+            });
+        }
+
+        // Layer 3: Near stars (large, fast, white)
+        for (let i = 0; i < layerCount; i++) {
+            this.stars.push({
+                x: Math.random() * this.canvas.width,
+                y: Math.random() * this.canvas.height,
+                radius: Math.random() * 1.5 + 1.5,
+                speed: (Math.random() * 0.5 + 0.3) * 1.0,
+                color: 'rgba(255, 255, 255, 1)',
+                layer: 3
             });
         }
     }
@@ -161,6 +196,8 @@ export class Game {
         this.projectiles = [];
         this.powerups = [];
         this.particles = [];
+        this.floatingTexts = [];
+        this.screenShake = { x: 0, y: 0, intensity: 0 };
         this.level = 1;
         this.scoreManager.reset();
         this.inputManager.reset();
@@ -251,6 +288,22 @@ export class Game {
         const stats = this.scoreManager.getStats();
         document.getElementById('final-score').textContent = stats.score;
         document.getElementById('accuracy').textContent = stats.accuracy;
+
+        // Display missed problems
+        const missedProblemsContainer = document.getElementById('missed-problems-list');
+        if (missedProblemsContainer) {
+            if (stats.missedProblems.length === 0) {
+                missedProblemsContainer.innerHTML = '<p style="color: #00ff00;">Perfect! No problems missed! 🎉</p>';
+            } else {
+                let html = '<h3>Problems to Practice:</h3><ul>';
+                stats.missedProblems.forEach((item, index) => {
+                    html += `<li><span class="problem">${item.problem}</span> = <span class="answer">${item.answer}</span></li>`;
+                });
+                html += '</ul>';
+                missedProblemsContainer.innerHTML = html;
+            }
+        }
+
         document.getElementById('gameover-screen').classList.remove('hidden');
         this.audioManager.gameOverSound();
     }
@@ -319,6 +372,10 @@ export class Game {
 
             // Remove if off screen (reached bottom - player loses)
             if (enemy.position.y > this.canvas.height) {
+                // Track missed problem
+                const problem = enemy.getProblem();
+                this.scoreManager.addMissedProblem(problem.text, problem.answer);
+
                 this.enemies.splice(i, 1);
                 this.scoreManager.resetStreak();
                 this.player.takeDamage();
@@ -360,6 +417,29 @@ export class Game {
             // Remove if inactive
             if (!particle.isActive()) {
                 this.particles.splice(i, 1);
+            }
+        }
+
+        // Update floating texts
+        for (let i = this.floatingTexts.length - 1; i >= 0; i--) {
+            const text = this.floatingTexts[i];
+            text.update();
+
+            // Remove if inactive
+            if (!text.isActive()) {
+                this.floatingTexts.splice(i, 1);
+            }
+        }
+
+        // Update screen shake
+        if (this.screenShake.intensity > 0) {
+            this.screenShake.x = (Math.random() - 0.5) * this.screenShake.intensity;
+            this.screenShake.y = (Math.random() - 0.5) * this.screenShake.intensity;
+            this.screenShake.intensity *= 0.9; // Decay
+            if (this.screenShake.intensity < 0.1) {
+                this.screenShake.intensity = 0;
+                this.screenShake.x = 0;
+                this.screenShake.y = 0;
             }
         }
 
@@ -417,6 +497,21 @@ export class Game {
                     this.config.SCORE.STREAK_MULTIPLIER
                 );
 
+                // Create floating text to show points earned
+                const streakBonus = this.scoreManager.getStreak();
+                let floatingTextColor = '#ffff00'; // Yellow for normal
+                let displayText = `+${pointsEarned}`;
+
+                if (streakBonus >= 5) {
+                    floatingTextColor = '#ff8800'; // Orange for 5+ streak
+                    displayText += ` x${streakBonus}!`;
+                } else if (streakBonus >= 3) {
+                    floatingTextColor = '#ffaa00'; // Light orange for 3+ streak
+                }
+
+                const floatingText = new FloatingText(explosionX, explosionY, displayText, floatingTextColor);
+                this.floatingTexts.push(floatingText);
+
                 // Spawn powerup chance
                 this.spawnPowerup(collision.enemy.position.x, collision.enemy.position.y);
 
@@ -436,6 +531,10 @@ export class Game {
         );
 
         for (const collision of playerEnemyCollisions) {
+            // Track missed problem
+            const problem = collision.enemy.getProblem();
+            this.scoreManager.addMissedProblem(problem.text, problem.answer);
+
             // Create explosion
             const explosionX = collision.enemy.position.x + collision.enemy.width / 2;
             const explosionY = collision.enemy.position.y + collision.enemy.height / 2;
@@ -448,6 +547,9 @@ export class Game {
             if (damaged) {
                 this.scoreManager.resetStreak();
                 this.audioManager.errorSound();
+
+                // Screen shake on damage
+                this.screenShake.intensity = 8;
 
                 if (!this.player.isAlive()) {
                     this.stateManager.setState(this.config.STATES.GAME_OVER);
@@ -503,6 +605,10 @@ export class Game {
         this.ctx.fillStyle = '#000';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
+        // Apply screen shake
+        this.ctx.save();
+        this.ctx.translate(this.screenShake.x, this.screenShake.y);
+
         // Draw stars
         this.renderStars();
 
@@ -527,12 +633,20 @@ export class Game {
             for (const powerup of this.powerups) {
                 powerup.render(this.ctx);
             }
+
+            // Render floating texts (on top)
+            for (const text of this.floatingTexts) {
+                text.render(this.ctx);
+            }
         }
+
+        // Restore canvas state (remove screen shake)
+        this.ctx.restore();
     }
 
     renderStars() {
-        this.ctx.fillStyle = '#fff';
         for (const star of this.stars) {
+            this.ctx.fillStyle = star.color;
             this.ctx.beginPath();
             this.ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
             this.ctx.fill();

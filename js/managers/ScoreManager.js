@@ -12,6 +12,7 @@ export class ScoreManager {
         this.correctAnswers = 0;
         this.wrongAnswers = 0;
         this.enemiesDestroyed = 0;
+        this.missedProblems = []; // Track problems that were missed
     }
 
     // Add score for destroying an enemy
@@ -46,6 +47,19 @@ export class ScoreManager {
         this.totalAnswered++;
     }
 
+    // Add a missed problem
+    addMissedProblem(problemText, correctAnswer) {
+        this.missedProblems.push({
+            problem: problemText,
+            answer: correctAnswer
+        });
+    }
+
+    // Get missed problems
+    getMissedProblems() {
+        return this.missedProblems;
+    }
+
     // Get current score
     getScore() {
         return this.score;
@@ -74,7 +88,8 @@ export class ScoreManager {
             correctAnswers: this.correctAnswers,
             wrongAnswers: this.wrongAnswers,
             accuracy: this.getAccuracy(),
-            enemiesDestroyed: this.enemiesDestroyed
+            enemiesDestroyed: this.enemiesDestroyed,
+            missedProblems: this.missedProblems
         };
     }
 

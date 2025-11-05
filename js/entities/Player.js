@@ -15,6 +15,7 @@ export class Player extends Entity {
         this.invincible = false;
         this.invincibleTimer = 0;
         this.shield = false;
+        this.bankAngle = 0; // For banking animation
     }
 
     // Update player based on input
@@ -23,6 +24,10 @@ export class Player extends Entity {
 
         // Apply movement (player speed is not affected by game speed - stays responsive)
         this.velocity.set(direction.x * this.speed, direction.y * this.speed);
+
+        // Update banking animation
+        const targetBank = direction.x * 0.15; // Max 0.15 radians (about 8 degrees)
+        this.bankAngle += (targetBank - this.bankAngle) * 0.2; // Smooth interpolation
 
         // Update position (pass 1.0 to keep player at normal speed)
         super.update(1.0);
@@ -51,6 +56,11 @@ export class Player extends Entity {
         }
 
         ctx.save();
+
+        // Apply banking rotation
+        ctx.translate(centerX, centerY);
+        ctx.rotate(this.bankAngle);
+        ctx.translate(-centerX, -centerY);
 
         // Draw shield if active
         if (this.shield) {

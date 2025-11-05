@@ -55,20 +55,58 @@ export class Enemy extends Entity {
         ctx.fillStyle = 'rgba(0, 255, 255, 0.3)';
         ctx.fillRect(centerX - 3, centerY - 7, 6, 4);
 
-        // Draw problem text with background
-        const problemY = this.position.y + this.height + 15;
+        // Draw problem text with enhanced background box
+        const fontSize = 18;
+        const paddingX = 12;
+        const paddingY = 10;
+        const problemY = this.position.y + this.height + 18;
+
+        // Measure text with larger font
+        ctx.font = `bold ${fontSize}px 'Courier New', monospace`;
         const textMetrics = ctx.measureText(this.problem.text);
-        const textWidth = textMetrics.width || this.problem.text.length * 10;
+        const textWidth = textMetrics.width || this.problem.text.length * 12;
 
-        // Problem background box
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
-        ctx.fillRect(centerX - textWidth / 2 - 5, problemY - 12, textWidth + 10, 20);
+        // Calculate box dimensions
+        const boxWidth = textWidth + paddingX * 2;
+        const boxHeight = fontSize + paddingY * 2;
+        const boxX = centerX - boxWidth / 2;
+        const boxY = problemY - boxHeight / 2;
+
+        // Draw rounded rectangle for problem box
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.95)';
         ctx.strokeStyle = this.color;
-        ctx.lineWidth = 2;
-        ctx.strokeRect(centerX - textWidth / 2 - 5, problemY - 12, textWidth + 10, 20);
+        ctx.lineWidth = 3;
 
-        // Problem text
-        drawText(ctx, this.problem.text, centerX, problemY, 14, '#fff');
+        // Rounded rectangle
+        const radius = 5;
+        ctx.beginPath();
+        ctx.moveTo(boxX + radius, boxY);
+        ctx.lineTo(boxX + boxWidth - radius, boxY);
+        ctx.quadraticCurveTo(boxX + boxWidth, boxY, boxX + boxWidth, boxY + radius);
+        ctx.lineTo(boxX + boxWidth, boxY + boxHeight - radius);
+        ctx.quadraticCurveTo(boxX + boxWidth, boxY + boxHeight, boxX + boxWidth - radius, boxY + boxHeight);
+        ctx.lineTo(boxX + radius, boxY + boxHeight);
+        ctx.quadraticCurveTo(boxX, boxY + boxHeight, boxX, boxY + boxHeight - radius);
+        ctx.lineTo(boxX, boxY + radius);
+        ctx.quadraticCurveTo(boxX, boxY, boxX + radius, boxY);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Inner shadow effect
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // Problem text - bold and larger
+        ctx.font = `bold ${fontSize}px 'Courier New', monospace`;
+        ctx.fillStyle = '#fff';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.shadowColor = '#000';
+        ctx.shadowBlur = 3;
+        ctx.fillText(this.problem.text, centerX, problemY);
+        ctx.shadowBlur = 0;
 
         ctx.restore();
     }
